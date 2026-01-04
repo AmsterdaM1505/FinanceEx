@@ -1,0 +1,83 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile main sources
+        shell: cmd
+        run: |
+          if exist out rmdir /s /q out
+          mkdir out
+          dir /s /b src\Main\*.java > sources.txt
+          javac -encoding UTF-8 -d out @sources.txt
+
+
+  test:
+    name: Test
+    runs-on: self-hosted
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile main sources
+        shell: cmd
+        run: |
+            if exist out rmdir /s /q out
+            mkdir out
+            dir /s /b src\Main\*.java > sources.txt
+            javac -encoding UTF-8 -d out @sources.txt
+
+      - name: Compile tests
+        shell: cmd
+        run: |
+          dir /s /b src\Tests\*.java > test_sources.txt
+          javac -encoding UTF-8 ^
+            -cp "C:\junit\junit-platform-console-standalone.jar;out" ^
+            -d out ^
+            @test_sources.txt
+
+      - name: Run tests
+        shell: cmd
+        run: |
+          java -jar C:\junit\junit-platform-console-standalone.jar ^
+            execute ^
+            --class-path out ^
+            --scan-class-path
+
+
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rebuild project
+        shell: cmd
+        run: |
+          if exist out rmdir /s /q out
+          mkdir out
+          dir /s /b src\Main\*.java > sources.txt
+          javac -encoding UTF-8 -d out @sources.txt
+
+      - name: Deploy build
+        shell: cmd
+        run: |
+          if not exist C:\deploy mkdir C:\deploy
+          if exist C:\deploy\out rmdir /s /q C:\deploy\out
+          xcopy /E /Y /I out C:\deploy\out
+          echo Application deployed to C:\deploy
