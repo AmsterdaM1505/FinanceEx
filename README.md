@@ -27,6 +27,8 @@ project-root/
 │       ├── WalletTest.java
 │       └── UserTest.java
 │
+├── .gitignore
+├── CutterEx.iml
 └── README.md                           # Документация проекта
 ```
 
@@ -201,12 +203,35 @@ help                            справка по командам
 - UserTest - проверка функций работы с пользователем и кошельком
 - WalletTest - проверка функций кошелька
 
+Для запуска тестов необходимо прописать следующие команды:
+1. `dir /s /b src\Tests\*.java > test_sources.txt
+          javac -encoding UTF-8 ^
+            -cp "C:\junit\junit-platform-console-standalone.jar;out" ^
+            -d out ^
+            @test_sources.txt` - компиляция
+2. `java -jar C:\junit\junit-platform-console-standalone.jar ^
+            execute ^
+            --class-path out ^
+            --scan-class-path` - запуск
+
 ## Технологии
 
 - Java
 - IntelliJ IDEA
 - JUnit 5
 - Git
+
+## Установка и запуск из GitHub
+Клонировать репозиторий через `git clone`
+
+В корне проекта открыть `cmd.exe` и запустить следующие команды:
+### Компиляция
+1. `rmdir /s /q out 2>nul`
+2. `mkdir out`
+3. `dir /s /b src\Main\*.java > sources.txt`
+6. `javac -encoding UTF-8 -d out @sources.txt`
+### Запуск
+`java -cp out Main`
 
 ### CI/CD
 В проекте реализован CI/CD конвейер на базе GitHub Actions с использованием self-hosted runner под Windows.
